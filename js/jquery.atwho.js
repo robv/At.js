@@ -373,16 +373,18 @@
       choose: function() {
         var $li, str;
         $li = this.jqo().find(".cur");
-        str = _isNil($li) ? this.holder.query.text + " " : $li.attr(this.holder.getOpt("choose")) + " ";
-        this.holder.replaceStr(str);
+        str = _isNil($li) ? this.holder.query.text + this.holder.getOpt('seperator') : $li.attr(this.holder.getOpt("choose")) + this.holder.getOpt('seperator');
+        if (this.holder.getOpt('display_selection'))
+          this.holder.replaceStr(str);
+        else
+          this.holder.replaceStr('');
+        this.holder.getOpt('afterChosen')(str);
         return this.hide();
       },
       rePosition: function() {
         var rect;
         rect = this.holder.rect();
-        if (rect.bottom + this.jqo().height() - $(window).scrollTop() > $(window).height()) {
-          rect.bottom = rect.top - this.jqo().height();
-        }
+        rect.bottom = rect.top - this.jqo().height();
         log("AtView.rePosition", {
           left: rect.left,
           top: rect.bottom
@@ -411,7 +413,7 @@
         return prev.addClass('cur');
       },
       show: function() {
-        if (!this.isShowing()) {
+        if (!this.isShowing() && this.holder.getOpt('disabled') == false) {
           this.jqo().show();
         }
         return this.rePosition();
@@ -550,9 +552,13 @@
       data: [],
       choose: "data-value",
       callback: null,
+      afterChosen: null,
       cache: true,
       limit: 5,
       display_flag: true,
+      seperator: ' ',
+      display_selection: true,
+      disabled: false,
       tpl: _DEFAULT_TPL
     };
   })(window.jQuery);
