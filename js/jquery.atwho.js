@@ -157,19 +157,10 @@
         format = function(value) {
           return value.replace(/</g, '&lt').replace(/>/g, '&gt').replace(/`/g, '&#96').replace(/"/g, '&quot').replace(/\r\n|\r|\n/g, "<br />");
         };
-        /* 克隆完inputor后将原来的文本内容根据
-          @的位置进行分块,以获取@块在inputor(输入框)里的position
-        */
 
         start_range = $inputor.val().slice(0, this.pos - 1);
         html = "<span>" + format(start_range) + "</span>";
         html += "<span id='flag'>@</span>";
-        /*
-                      将inputor的 offset(相对于document)
-                      和@在inputor里的position相加
-                      就得到了@相对于document的offset.
-                      当然,还要加上行高和滚动条的偏移量.
-        */
 
         offset = $inputor.offset();
         at_rect = this.mirror.init($inputor).setContent(html).getFlagRect();
@@ -197,15 +188,14 @@
         $inputor = this.$inputor;
         text = $inputor.val();
         caret_pos = $inputor.caretPos();
-        /* 向在插入符前的的文本进行正则匹配
-         * 考虑会有多个 @ 的存在, 匹配离插入符最近的一个
-        */
-
         subtext = text.slice(0, caret_pos);
         matched = null;
         $.each(this.options, function(flag) {
-          var match, regexp;
-          regexp = new RegExp(flag + '([A-Za-z0-9_\+\-]*)$|' + flag + '([^\\x00-\\xff]*)$', 'gi');
+          var match, 
+            regexp,
+            starting_char = (_this.getOpt("start_of_string_only")) ? '^' : '';
+          
+          regexp = new RegExp(starting_char + flag + '([A-Za-z0-9_\+\-]*)$|' + flag + '([^\\x00-\\xff]*)$', 'gi');
           match = regexp.exec(subtext);
           if (!_isNil(match)) {
             matched = match[2] ? match[2] : match[1];
@@ -378,7 +368,7 @@
           this.holder.replaceStr(str);
         else
           this.holder.replaceStr('');
-        this.holder.getOpt('afterChosen')(str);
+        this.holder.getOpt('chosen_callback')(str);
         return this.hide();
       },
       rePosition: function() {
@@ -552,13 +542,14 @@
       data: [],
       choose: "data-value",
       callback: null,
-      afterChosen: null,
+      chosen_callback: null,
       cache: true,
       limit: 5,
       display_flag: true,
       seperator: ' ',
       display_selection: true,
       disabled: false,
+      start_of_string_only: false,
       tpl: _DEFAULT_TPL
     };
   })(window.jQuery);
